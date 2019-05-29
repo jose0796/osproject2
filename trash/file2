@@ -1,0 +1,4 @@
+-rw------- 1 sam sam     0 May 28 18:52 file1
+-rw-rw-r-- 1 sam sam 17801 May 28 18:51 simple-c-shell.c
+-rwxrwxr-x 1 sam sam 18808 May 28 18:51 simple.o
+-rw-rw-r-- 1 sam sam   524 May 27 21:00 util.h

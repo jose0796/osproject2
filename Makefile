@@ -10,9 +10,9 @@ SHELL=bash
 .SUBMAKE	= $(MAKE) --no-print-directory
 .PWD		= $(shell pwd)
 .SRC		= src
-.BFOLDER	= $(.PWD)/build
+.BFOLDER	= $(.PWD)/bin
 .TESTSF		= tests
-.TBEXE		= $(.BFOLDER)/$(.PROJECTNAME).exe 
+.TBEXE		= $(.BFOLDER)/$(.PROJECTNAME).o
 
 # ------------------------------------------------------------------------------
 # targets
@@ -29,7 +29,7 @@ help:
 compile:
 	@printf "%b" "Building TeSh\n"
 	@mkdir -p $(.BFOLDER)
-	+@$(.SUBMAKE) -C $(.SRC) compile BUILD_DIR=$(.BFOLDER)
+	+@$(.SUBMAKE) -C $(.SRC) compile BIN_DIR=$(.BFOLDER)
 
 # ------------------------------------------------------------------------------
 # run TeSh
