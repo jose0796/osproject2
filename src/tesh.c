@@ -108,6 +108,7 @@ void execute(char * arg){
 
             signal(SIGINT, SIG_IGN);
             setenv("PATH", "/home/sam/Documents/Operativos/osproject2/bin/", 1);
+            printf("%s\n", command[0]);
             if (execvp(command[0], command) < 0){
                 printf("Command not found.\n");
                 kill(getpid(), SIGTERM);
