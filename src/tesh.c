@@ -251,6 +251,9 @@ void handle_command(char * args[]){
         changeDirectory(command[1]);
         
     }
+    else if (!strcmp(args[0], "clear")){
+        system("clear");
+    }
     else if (!strcmp(args[0], "pwd")){
         printf("%s\n", getenv("PWD"));
     }else{

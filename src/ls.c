@@ -20,6 +20,10 @@
 #define COLOR   0b10000000
 
 
+#define KB      1024
+#define MB      1048576
+#define GB      1073741824
+
 #define ANSI_COLOR_RED     "\x1b[31m"
 #define ANSI_COLOR_GREEN   "\x1b[32m"
 #define ANSI_COLOR_YELLOW  "\x1b[33m"
@@ -27,6 +31,32 @@
 #define ANSI_COLOR_MAGENTA "\x1b[35m"
 #define ANSI_COLOR_CYAN    "\x1b[36m"
 #define ANSI_COLOR_RESET   "\x1b[0m"
+
+char * human_readable(int size){
+
+    static char s[10];
+    float div; 
+
+    if (size < KB){
+        sprintf(s, "%6d", size);
+    }
+    else if (size >= KB && size < MB){
+        div = (float) size / (float) KB; 
+        sprintf(s, "%5.1fK", div);
+    }else if (size >= MB && size < GB){
+        div = (float) size / (float) MB; 
+        sprintf(s, "%5.1fM", div);
+    }else {
+        div = (float) size / (float) GB; 
+        sprintf(s, "%5.1fG", div);
+    }
+
+
+    return(s);
+
+
+}
+
 
 char * time_format(struct timespec m_time){
 
@@ -68,12 +98,17 @@ void detailed_printing(char * filename, struct stat fileSt, int flags, int color
         printf( " %2s" , gr->gr_name); 
     }
     
+    if (flags & HMN){
+        printf(" %s", human_readable((int) fileSt.st_size));
+    }else{
+        printf(" %10d", (int) fileSt.st_size); 
+    }
     
-    printf(" %10d %s", (int) fileSt.st_size, time_format(fileSt.st_mtim)); 
+    printf(" %s" ,time_format(fileSt.st_mtim)); 
     if (COLOR)
-        printf( ANSI_COLOR_CYAN " %s \n" ANSI_COLOR_RESET); 
+        printf( ANSI_COLOR_CYAN " %s \n" ANSI_COLOR_RESET, filename); 
     else 
-        printf( " %s \n"); 
+        printf( " %s \n" , filename); 
 
 
 }
@@ -84,6 +119,9 @@ void printdir(char * dir, int flags){
     DIR *dp;
     struct dirent *entry;
     struct stat statbuf;
+
+    char directories[100][100];
+    int num_subds = 0 ; 
     if((dp = opendir(dir)) == NULL) {
         if ((dp = opendir(getenv("PWD"))) == NULL){
             printf("Error opening directory.");
@@ -126,7 +164,12 @@ void printdir(char * dir, int flags){
             }else{
                 printf( ANSI_COLOR_CYAN " %s " ANSI_COLOR_RESET,entry->d_name);
             }
-            //printdir(entry->d_name,depth);
+            if (flags & RCRS && flags & DETAIL){
+                strcpy(directories[num_subds], entry->d_name);
+                ++num_subds;
+
+            }
+
         }
         else {
 
@@ -140,8 +183,16 @@ void printdir(char * dir, int flags){
             }
         
         }
+
+        
     }
     printf("\n");
+    flags = flags ^ RCRS;
+    for (int x = 0; x < num_subds; ++x){
+        printf("./%s: \n\n", directories[x]); 
+        printdir(directories[x], flags);
+    }
+    
     chdir("..");
     closedir(dp);
 
@@ -203,7 +254,7 @@ int flagParser(char * argv[], char * path){
                         break;
                     
                     case 'R':
-                        flags = flags | HMN; 
+                        flags = flags | RCRS; 
                         break;
                     
                     default: 
@@ -265,6 +316,7 @@ int main(int argc, char * argv[]){
         int flags = flagParser(argv, path);
         printdir(path, flags);
     }
+
 
 
 
