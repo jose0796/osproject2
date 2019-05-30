@@ -16,6 +16,7 @@
 #define RD_END 0
 #define WR_END 1
 
+char cwd[1024];
 
 pid_t tesh_pgid; 
 int tesh_terminal, tesh_is_interactive; 

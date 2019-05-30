@@ -8,8 +8,11 @@ int main(){
 
     init_tesh();
 
+    setenv("PATH", "/home/sam/Documents/Operativos/osproject2/bin/",1);
+
     while(1){
         tks = 0;
+        
         prompt();
         memset ( command, '\0', COMMAND_SIZE );
         fgets(command, COMMAND_SIZE, stdin);
@@ -67,11 +70,30 @@ void init_tesh(){
 
 }
 
+int changeDirectory(char * path){
+    
+    if (path == NULL) {
+		    chdir(getenv("HOME")); 
+            setenv("PWD", getcwd(cwd,1024), 1);
+		    return 0;
+	    }
+	    // Else we change the directory to the one specified by the 
+	    // argument, if possible
+	    else{ 
+		    if (chdir(path) == -1) {
+			    printf(" %s: no such directory\n", path);
+                return -1;
+	    	}
+            setenv("PWD", getcwd(cwd,1024), 1);
+	    }
+}
+
+
 
 void prompt(){
     char hname[1024] = "";
     gethostname(hname, sizeof(hname));
-    printf("%s@%s:%s $--> ", getenv("USER"), hname, getenv("PWD"));
+    printf("%s@%s:%s $--> ", getenv("USER"), hname, getcwd(cwd, 1024));
 }
 
 int enumerate_command(char * args[]){
@@ -84,11 +106,12 @@ int enumerate_command(char * args[]){
 }
 
 void split(char * __dst[], char * __src, const char * s){
+
     int i = 0;
     if ((__dst[i] = strtok(__src, s)) != NULL){
         do{
             ++i;
-        }while((__dst[i] = strtok(NULL,s)) != NULL && i < MAXP); 
+        }while((__dst[i] = strtok(NULL,s)) != NULL); 
     }
 
 
@@ -107,8 +130,6 @@ void execute(char * arg){
         if (child == 0){
 
             signal(SIGINT, SIG_IGN);
-            setenv("PATH", "/home/sam/Documents/Operativos/osproject2/bin/", 1);
-            printf("%s\n", command[0]);
             if (execvp(command[0], command) < 0){
                 printf("Command not found.\n");
                 kill(getpid(), SIGTERM);
@@ -172,7 +193,7 @@ void pipe_handler(char * args[], int num_cmds){
                 }
                 
             }
-            setenv("PATH", "/home/sam/Documents/Operativos/osproject2/bin/", 1);
+            
             split(command,args[i]," "); 
             if (execvp(command[0], command) < 0){
                 perror("Could not initiate child process.\n");
@@ -214,9 +235,24 @@ void pipe_handler(char * args[], int num_cmds){
 
 void handle_command(char * args[]){
 
+
+    char * command[256];
+    char tmp[32];
+
+    strcpy(tmp,args[0]);
+
+    split(command, tmp, " "); 
+
     int nro_cmd = enumerate_command(args); 
     if (!strcmp(args[0], "exit")){
         exit(0);
+    }
+    else if (!strcmp(command[0], "cd")){
+        changeDirectory(command[1]);
+        
+    }
+    else if (!strcmp(args[0], "clear")){
+        system("clear");
     }
     else if (!strcmp(args[0], "pwd")){
         printf("%s\n", getenv("PWD"));
