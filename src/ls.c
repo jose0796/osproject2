@@ -133,10 +133,13 @@ void printdir(char * dir, int flags){
                         printf("%2d ", (int )  statbuf.st_ino); 
                     }
                     if (flags & DETAIL){
+                        lstat(entry->d_name, &statbuf);
                         detailed_printing(entry->d_name, statbuf, flags, 0); 
+                        
                     }else{
                         printf("%s  ",entry->d_name);
                     }
+                    return; 
                 }
 
             }
@@ -265,26 +268,6 @@ int flagParser(char * argv[], char * path){
         }
 
 
-        // if (!strcmp(argv[i], "-l")){
-        //     flags = flags & DETAIL;
-        // }
-        // else if (!strcmp(argv[i], "-a") ||
-        //          !strcmp(argv[i], "-la") ||
-        //          !strcmp(argv[i], "-ia") || 
-        //          !strcmp(argv[i], "-Ga")){
-        //     flags = flags & HIDDEN; 
-        // }else if (!strcmp(argv[i], "-i")){
-        //     flags = flags & INDEX; 
-        // }else if (!strcmp(argv[i], "-G")){
-        //     flags = flags & OGRP; 
-        // }else if (!strcmp(argv[i], "-g")){
-        //     flags = flags & OWNR; 
-        // }else if (!strcmp(argv[i], "-h")){
-        //     flags = flags & HMN; 
-        // }else if (!strcmp(argv[i], "-R")){
-        //     flags = flags & RCRS; 
-        // }else if (!strcmp(argv[i], "-la"))
-
 
     }
     if (!found_path){
@@ -316,30 +299,6 @@ int main(int argc, char * argv[]){
         int flags = flagParser(argv, path);
         printdir(path, flags);
     }
-
-
-
-
-    //if (lstat(argv[1],&fileSt) < 0 ) return -1; 
-
-    
-    
-    
-
-
-    // sprintf(str, (S_ISDIR(fileSt.st_mode))? "d": "-"); 
-    // strcat(str, (fileSt.st_mode & S_IRUSR)? "r": "-");
-    // strcat(str, (fileSt.st_mode & S_IWUSR)? "w": "-");
-    // strcat(str, (fileSt.st_mode & S_IXUSR)? "x": "-");
-    // strcat(str, (fileSt.st_mode & S_IRGRP)? "r": "-");
-    // strcat(str, (fileSt.st_mode & S_IWGRP)? "w": "-");
-    // strcat(str, (fileSt.st_mode & S_IXGRP)? "x": "-");
-    // strcat(str, (fileSt.st_mode & S_IROTH)? "r": "-");
-    // strcat(str, (fileSt.st_mode & S_IWOTH)? "w": "-");
-    // strcat(str, (fileSt.st_mode & S_IXOTH)? "x": "-");
-
-
-
 
     return 0;
 }
