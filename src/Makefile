@@ -5,11 +5,14 @@
 .SHELL      = bash
 .PWD        = $(shell pwd)
 .COMPILER   = gcc 
+.LINKER     = gcc -c
 .FILES      =  \
               ls \
               grep \
               chmod \
-							tesh
+	      tesh \
+						
+.EXE 	    = tesh
     
 .files_o    = $(addsuffix .o, $(.FILES))
 .files_c    = $(addsuffix .c, $(.FILES))
@@ -23,14 +26,13 @@
 compile: $(.files_o)
 
 	@for file in $(.FILES); do \
-		$(.COMPILER) $(addsuffix .c, $$file) -o $(addsuffix .o ,$$file) ;        \
+		$(.LINKER) $(addsuffix .c, $$file) -o $(addsuffix .o ,$$file) ;        \
 	done 
 
-	mv *.o $(.BFOLDER)/
+	$(.COMPILER) $(addsuffix .o, $(.FILES)) -o $(.EXE) 
 	
-	@for file in $(.FILES); do \
-		mv $(.BFOLDER)/$(addsuffix .o, $$file) $(.BFOLDER)/$$file; \
-	done
+	mv *.o $(.EXE) $(.BFOLDER)/
+	
 
 #-------------------------------------------------------------------------------
 

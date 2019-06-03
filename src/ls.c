@@ -5,32 +5,10 @@
 #include<dirent.h>
 #include<sys/types.h>
 #include<string.h>
-#include <pwd.h>
-#include <grp.h>
-#include <time.h>
-#include <stdbool.h>
-
-#define DETAIL  0b1
-#define HIDDEN  0b10
-#define INDEX   0b100
-#define OGRP    0b1000
-#define OWNR    0b10000
-#define HMN     0b100000
-#define RCRS    0b1000000
-#define COLOR   0b10000000
-
-
-#define KB      1024
-#define MB      1048576
-#define GB      1073741824
-
-#define ANSI_COLOR_RED     "\x1b[31m"
-#define ANSI_COLOR_GREEN   "\x1b[32m"
-#define ANSI_COLOR_YELLOW  "\x1b[33m"
-#define ANSI_COLOR_BLUE    "\x1b[34m"
-#define ANSI_COLOR_MAGENTA "\x1b[35m"
-#define ANSI_COLOR_CYAN    "\x1b[36m"
-#define ANSI_COLOR_RESET   "\x1b[0m"
+#include<pwd.h>
+#include<grp.h>
+#include<time.h>
+#include "ls.h"
 
 char * human_readable(int size){
 
@@ -72,7 +50,7 @@ char * time_format(struct timespec m_time){
 
 
 
-void detailed_printing(char * filename, struct stat fileSt, int flags, int colored){
+void detailed_printing(char * filename, struct stat fileSt, int flags){
 
     struct passwd * pw = getpwuid(fileSt.st_uid); 
     struct group * gr  = getgrgid(fileSt.st_gid); 
@@ -91,11 +69,11 @@ void detailed_printing(char * filename, struct stat fileSt, int flags, int color
     printf((fileSt.st_mode & S_IXOTH)? "x": "-");
     printf(" %1d", (int) fileSt.st_nlink);
     if (!(flags & OWNR )){
-        printf( " %2s", pw->pw_name); 
+        printf( " %4s", pw->pw_name); 
     }
 
     if (!(flags & OGRP )){
-        printf( " %2s" , gr->gr_name); 
+        printf( " %4s" , gr->gr_name); 
     }
     
     if (flags & HMN){
@@ -103,12 +81,8 @@ void detailed_printing(char * filename, struct stat fileSt, int flags, int color
     }else{
         printf(" %10d", (int) fileSt.st_size); 
     }
-    
-    printf(" %s" ,time_format(fileSt.st_mtim)); 
-    if (COLOR)
-        printf( ANSI_COLOR_CYAN " %s \n" ANSI_COLOR_RESET, filename); 
-    else 
-        printf( " %s \n" , filename); 
+    printf(" %s" ,time_format( fileSt.st_mtim)); 
+    printf( " %s \n" , filename); 
 
 
 }
@@ -119,6 +93,7 @@ void printdir(char * dir, int flags){
     DIR *dp;
     struct dirent *entry;
     struct stat statbuf;
+    int error; 
 
     char directories[100][100];
     int num_subds = 0 ; 
@@ -127,6 +102,7 @@ void printdir(char * dir, int flags){
             printf("Error opening directory.");
             
         }else{
+            
             while((entry = readdir(dp)) != NULL){
                 if (!strcmp(entry->d_name, dir)){
                     if (flags & INDEX){
@@ -134,24 +110,31 @@ void printdir(char * dir, int flags){
                     }
                     if (flags & DETAIL){
                         lstat(entry->d_name, &statbuf);
-                        detailed_printing(entry->d_name, statbuf, flags, 0); 
+                        detailed_printing(entry->d_name, statbuf, flags); 
                         
                     }else{
-                        printf("%s  ",entry->d_name);
+                        printf("%s ",entry->d_name);
                     }
-                    return; 
+                    printf("\n");
+                    return;   
                 }
 
             }
             printf("ls: cannot access '%s': No such a file or directory\n", dir);
         }
+        
         return;
     }
     chdir(dir); // change directory 
     while((entry = readdir(dp)) != NULL) {
-        //printf("\n%s\n, flags = %d", entry->d_name, flags);
+        
 
-        lstat(entry->d_name,&statbuf);
+        error = lstat(entry->d_name,&statbuf);
+        if (error < 0){
+            printf("ls: cannot access '%s': No such a file or directory\n", dir); 
+            break; 
+        }
+       
         if((strcmp(".",entry->d_name) == 0 ||
             strcmp("..",entry->d_name) == 0 || 
             (entry->d_name[0] == '.')) && !(flags & HIDDEN)) 
@@ -163,11 +146,11 @@ void printdir(char * dir, int flags){
                 printf("%2d ", (int )  statbuf.st_ino); 
             }
             if (flags & DETAIL){
-                detailed_printing(entry->d_name, statbuf, flags, COLOR); 
+                detailed_printing(entry->d_name, statbuf, flags); 
             }else{
-                printf( ANSI_COLOR_CYAN " %s " ANSI_COLOR_RESET,entry->d_name);
+                printf( "%s  ",entry->d_name);
             }
-            if (flags & RCRS && flags & DETAIL){
+            if (flags & RCRS){
                 strcpy(directories[num_subds], entry->d_name);
                 ++num_subds;
 
@@ -180,7 +163,7 @@ void printdir(char * dir, int flags){
                 printf("%2d ", (int )  statbuf.st_ino); 
             }
             if (flags & DETAIL){
-                detailed_printing(entry->d_name, statbuf, flags, 0); 
+                detailed_printing(entry->d_name, statbuf, flags); 
             }else{
                 printf("%s  ",entry->d_name);
             }
@@ -201,7 +184,7 @@ void printdir(char * dir, int flags){
 
 }
 
-int num_par(char * argv[]){
+int ls_size(char * argv[]){
     int i = 0; 
     while(argv[i]!= NULL){
         ++i; 
@@ -211,60 +194,83 @@ int num_par(char * argv[]){
 
 
 
-int flagParser(char * argv[], char * path){
+int ls_flag_parser(char * argv[], char * path){
 
-    int num = num_par(argv);
+    int num = ls_size(argv);
+    int length = 0; 
     int len = 0; 
     int flags = 0; 
     int found_path = 0;
+    char buffer[100];
 
-    for(int i = 1 ; i < num; ++i){
+    for(int i = 1 ; i < num && strcmp(argv[i],">"); ++i){
 
-        len = strlen(argv[i]);
+        
 
-        if (argv[i][0] != '-'){
-            strcpy(path, argv[i]); 
-            found_path = 1;
-            return flags;
-        }
+        if (argv[i][0] != '-' && !found_path){
+            
+            if (argv[i][0] == '<'){ // input file 
+                FILE * fp = fopen(argv[i+1], "r"); 
+                
+                if (fp == NULL){
+                    printf("tesh: %s: No such a file or directory.", argv[i+1]);
+                    return -1;
+                }
 
-        for(int j = 0; j < len; ++j){
-            if (argv[i][j] != '-') {
-                switch(argv[i][j]){
+                fgets(buffer,100,fp);
+                length = strlen(buffer);
+                buffer[length-1] = '\0';
+                strcpy(path,buffer);
+                fclose(fp);
 
-                    case 'l': 
-                        flags = flags | DETAIL; 
-                        break;
-                    
-                    case 'i':
-                        flags = flags | INDEX; 
-                        break; 
-                    
-                    case 'a':
-                        flags = flags | HIDDEN; 
-                        break;
+            }else{ // just use given directory 
+                strcpy(path, argv[i]);              
+            }
+            found_path = 1; 
+        }else if (argv[i][0] == '-'){
 
-                    case 'G':
-                        flags = flags | OGRP; 
-                        break;
-                    
-                    case 'g':
-                        flags = flags | OWNR; 
-                        break;
-                    
-                    case 'h':
-                        flags = flags | HMN; 
-                        break;
-                    
-                    case 'R':
-                        flags = flags | RCRS; 
-                        break;
-                    
-                    default: 
-                        break;
+            len = strlen(argv[i]);
 
+            for(int j = 0; j < len; ++j){
+                if (argv[i][j] != '-') {
+                    switch(argv[i][j]){
+
+                        case 'l': 
+                            flags = flags | DETAIL; 
+                            break;
+                        
+                        case 'i':
+                            flags = flags | INDEX; 
+                            break; 
+                        
+                        case 'a':
+                            flags = flags | HIDDEN; 
+                            break;
+
+                        case 'G':
+                            flags = flags | OGRP; 
+                            break;
+                        
+                        case 'g':
+                            flags = flags | OWNR; 
+                            break;
+                        
+                        case 'h':
+                            flags = flags | HMN; 
+                            break;
+                        
+                        case 'R':
+                            flags = flags | RCRS; 
+                            break;
+                        
+                        default: 
+                            break;
+
+                    }
                 }
             }
+
+        
         }
 
 
@@ -282,23 +288,22 @@ int flagParser(char * argv[], char * path){
 }
 
 
-int main(int argc, char * argv[]){
+int myls(char * argv[]){
 
     struct stat fileSt; 
     struct dirent dir; 
 
-    //printf("argv[1] = %s", argv[1]);
-
     if (argv[1] == NULL){
         printdir(getenv("PWD"), 0);
         
-    }else if (argv[1][0] != '-'){
+    }else if (argv[1][0] != '-' && argv[1][0] != '<' && argv[1][0] != '>'){
         printdir(argv[1], 0);
     }else{
         char path[1024]; 
-        int flags = flagParser(argv, path);
+        int flags = ls_flag_parser(argv, path);
         printdir(path, flags);
     }
 
     return 0;
 }
+

@@ -2,16 +2,19 @@
 #include<stdlib.h>
 #include<sys/stat.h>
 #include<string.h>
-
-#define RD  0b1
-#define WR  0b10
-#define XC  0b100
-#define NRD 0b1000
-#define NWR 0b10000
-#define NXC 0b100000
+#include "chmod.h"
 
 
 void change_permission(char * filename, int flags){
+    /* 
+        Changes permissions of file
+        @param  char *   filename
+        @param  int      flags 
+        @return void 
+
+     */
+
+
     struct stat fileSt; 
     lstat(filename, &fileSt);
 
@@ -40,7 +43,7 @@ void change_permission(char * filename, int flags){
 }
 
 
-int size(char * args[]){
+int chmod_size(char * args[]){ 
     int i = 0; 
     while(args[i] != NULL){
         ++i; 
@@ -50,48 +53,53 @@ int size(char * args[]){
 }
 
 
-#define FLAG 1
 
-int flags_parser(char *  args[], char * filename){
+
+int chmod_flags_parser(char *  args[], char * filename){
+
+    /* 
+        Parser for flags received 
+        @param  char *[]    args
+        @param  char *      filename
+        @return int         flags 
+     */
+
+
 
     int flags = 0; 
+    int siz = chmod_size(args);
+    int len = 0; 
 
-    int len = strlen(args[1]);
+    for (int i = 0; i < siz && strcmp(args[i], ">"); ++i){
 
-    if (args[FLAG] != NULL){
+        len = strlen(args[i]); // 
 
-        if (args[FLAG][0] == '+'){
+        if (args[i][0] == '+'){ // add perm. 
 
-            for(int i = 1; i < len; ++i){
-                if (args[FLAG][i] == 'r'){
+            for(int j = 1; j < len; ++j){ 
+                if (args[i][j] == 'r'){ //-> read permission
                     flags = flags | RD; 
-                }else if (args[FLAG][i] == 'w'){
+                }else if (args[i][j] == 'w'){ // -> write permission 
                     flags = flags | WR; 
-                }else if (args[FLAG][i] ==  'x'){
+                }else if (args[i][j] ==  'x'){ // -> execution permission 
                     flags = flags | XC; 
                 }
             }
-        }else if (args[FLAG][0] == '-'){
-            for(int i = 1; i < len; ++i){
-                if (args[FLAG][i] == 'r'){
+        }else if (args[i][0] == '-'){ // remove perm.
+            for(int j = 1; j < len; ++j){
+                if (args[i][j] == 'r'){
                     flags = flags | NRD; 
-                }else if (args[FLAG][i] == 'w'){
+                }else if (args[i][j] == 'w'){
                     flags = flags | NWR; 
-                }else if (args[FLAG][i] ==  'x'){
+                }else if (args[i][j] ==  'x'){
                     flags = flags | NXC; 
                 }
             }
-        }else{
-            strcpy(filename, args[FLAG]);
+        }else if (args[i][0] == '<'){
+            strcpy(filename, args[i]);
         }
+    }
 
-    }
-    if (args[2] != NULL){
-        strcpy(filename, args[2]);
-    }
-    
-    
-    
     return flags; 
 
 }
@@ -99,24 +107,23 @@ int flags_parser(char *  args[], char * filename){
 
 
 
-int main(int args, char * argv[]){
+int mychmod(char * argv[]){
 
     char filename[100]; 
-    int flags = flags_parser(argv, filename);
+    int flags = chmod_flags_parser(argv, filename);
 
-    // printf("filename: %s\n", filename); 
-    // printf("flags: %d\n", flags);
-    if (filename == NULL){
+    
+    if (filename == NULL){ // nothing was given 
         printf("chmod: missing operand\n");
         return -1;
     }
-    else if (!flags){
+    else if (!flags){ // incorrent flags 
         printf("chmod: missing operand after '%s'\n", filename);
         return -1;
     }else{
         change_permission(filename, flags);
-
     }
+    return 0;
 
 	
 }
