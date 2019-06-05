@@ -4,8 +4,8 @@
 #-------------------------------------------------------------------------------
 .SHELL      = bash
 .PWD        = $(shell pwd)
-.COMPILER   = gcc 
-.LINKER     = gcc -c
+.COMPILER   = gcc -g
+.LINKER     = gcc -c -g
 .FILES      =  \
               ls \
               grep \

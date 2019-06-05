@@ -210,18 +210,10 @@ int ls_flag_parser(char * argv[], char * path){
         if (argv[i][0] != '-' && !found_path){
             
             if (argv[i][0] == '<'){ // input file 
-                FILE * fp = fopen(argv[i+1], "r"); 
-                
-                if (fp == NULL){
-                    printf("tesh: %s: No such a file or directory.", argv[i+1]);
-                    return -1;
-                }
-
-                fgets(buffer,100,fp);
+                fgets(buffer,100, stdin);
                 length = strlen(buffer);
                 buffer[length-1] = '\0';
                 strcpy(path,buffer);
-                fclose(fp);
 
             }else{ // just use given directory 
                 strcpy(path, argv[i]);              

@@ -1,0 +1,68 @@
+
+
+Introduccion 
+
+    Este proyecto consiste en la implementacion de un shell minimalista que sirve
+    para poder ejecutar los comandos ls, grep y chmod bajo un diseno propio y utilizando 
+    las librerias stat.h y dirent.h. 
+
+    El diseno de una solucion se baso en la estructura basica de un shell. Se utilizaron 
+    elementos de la programacion modular para dar al codigo un enfoque mas estructurado. 
+
+    Se provee una solucion completa al proyecto planteado, pudiendose ejecutar scripts, asi 
+    como una interfaz de linea de comandos. 
+
+
+Diseno 
+
+    El comando de ejecucion del codigo varia dependiendo del proposito. Si se requiere una 
+    ventana interactiva se puede correr el siguiente comando desde el directorio principal
+    del proyecto. 
+
+        make run-interactive
+    
+    Este comando realiza, haciendo uso del Makefile provisto, una compilacion del codigo 
+    fuente y entra en el modo interactivo del shell. Del mismo modo, para poder correr un 
+    script se corre el siguiente comando 
+
+        make run-script SCRIPT={nombre script}
+    
+    donde se le asigna a la variable de ambiente el nombre con la ruta al script deseado. 
+
+    Para el diseno de la linea de comandos se utilizo la programacion modular. Cada comando 
+    representa un archivo .c con su respectivo archivo .h el cual es importado dentro del 
+    programa principal y ejecutado segun los comandos de entrada del usuario. 
+
+    El programa espera por los comandos de entrada de parte del usuario. Una vez introducido
+    el comando, se procede a verificar si el comando corresponde a alguno de los comandos 
+    implementados. Para realizar esta verificacion primero se subdivide el comando por lineas 
+    de pipes "|" para poder utilizar la funcion pipe_handler() que se encarga de realizar la 
+    ejecucion ordenada del numero de comandos provistos y separados por pipes, asi como la 
+    asignacion de los pipes de entrada y salida de cada comando. En caso de solo tener un comando,
+    se maneja directamente con la funcion execute(). En ambos casos, tanto la funcion execute() como
+    la funcion pipe_handler() subdividen la cadena de caracteres nuevamente por espacios " " y le pasan
+    el arreglo de cadenas de caracteres a la funcion correspondiente basandose en la primera cadena 
+    de caracteres de este arreglo. 
+
+    Para manejar los pipes se realizo la asignacion dinamica de entrada y salida segun la posicion del 
+    comando con relacion al numero total de comandos. Es decir, el primer comando a ejecutarse redirecciona
+    la salida estandar a traves del primer pipe. Luego, el segundo comando utiliza el primer pipe como entrada
+    estandar y un segundo pipe para su salida estandar. Asi, el tercer comando utiliza el segundo pipe como 
+    entrada estandar y el primer pipe para la salida estandar. Esto se repite sucesivamente hasta el final del 
+    comando concatenado. 
+
+
+Conclusion 
+
+    El proyecto logra ejecutar correctamente los scripts de prueba. Asi mismo, puede manejar pipes y redirecciones 
+    de la salida estandar y entrada estandar. Cada uno de los comandos maneja todas las opciones indicadas en el 
+    enunciado del proyecto. 
+
+    Si bien el diseno del proyecto se realizo de forma modular, no se provee manera de poder agregar comandos de 
+    forma dinamica. Por lo tanto, si se quiere agregar un comando de forma dinamica se debe recompilar todo el proyecto. 
+    Si se opta por una implementacion que utilice la llamada al sistema execv(), se puede proveer de una implementacion
+    que es mucho mas flexible. Sin embargo, si se elige este diseno se debe tomar en cuenta que la variable de entorno
+    PATH contiene la informacion que utiliza execv() para ejecutar el comando. Por lo tanto, se debe reescribir esta con
+    la direccion absoluta del directorio en el que estarian contenidos los archivos binarios de cada comando a implementar. 
+    Esto produciria una ejecucion mucho mas flexible por cuanto no existe necesidad de recompilar el archivo principal. 
+
