@@ -1,3 +1,10 @@
+/*
+ * Author: Jose Moran
+ * email : jmoran071996@gmail.com 
+ * github: jose0796
+ * 
+ */
+
 
 #define IGN 0b1
 #define INV 0b10

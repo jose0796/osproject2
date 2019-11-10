@@ -1,4 +1,11 @@
 
+/*
+ * Author: Jose Moran
+ * email : jmoran071996@gmail.com 
+ * github: jose0796
+ * 
+ */
+
 #define DETAIL  0b1
 #define HIDDEN  0b10
 #define INDEX   0b100

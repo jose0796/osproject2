@@ -1,3 +1,10 @@
+/*
+ * Author: Jose Moran
+ * email : jmoran071996@gmail.com 
+ * github: jose0796
+ * 
+ */
+
 #define _GNU_SOURCE 
 
 #include<stdio.h>
@@ -82,52 +89,10 @@ FILE * grep_flag_handler(char * argv[], char * pattern, int * flags){
     return fp;
 
 
-    // if (argv[FLG] == NULL){
-    //     return NULL;  
-    // }else if (argv[FLG][0] != '-'){
-    //     if (argv[PRM] != NULL){
-    //         fp = fopen(argv[PRM], "r"); 
-    //     }else{
-    //         fp = fdopen(STDIN_FILENO, "r"); 
-    //     }
-    //     strcpy(pattern, argv[FLG]); 
-    //     *flags = 0; 
-    //     return fp; 
-
-
-    // }else if (argv[FLG][0] == '-'){
-    //     if (argv[PRM] != NULL){
-    //         if (argv[FIL] != NULL){
-    //             fp = fopen(argv[FIL], "r"); 
-    //         }else{
-    //             fp = fdopen(STDIN_FILENO, "r");
-    //         }
-    //         strcpy(pattern, argv[PRM]); 
-            
-            
-    //         len = strlen(argv[FLG]); 
-
-    //         for (int i = 1; i < len; ++i){
-    //             switch(argv[FLG][i]){
-    //                 case 'i':
-    //                     *flags |= IGN; 
-    //                     break; 
-    //                 case 'v':
-    //                     *flags |= INV; 
-    //                     break;
-    //             }
-    //         } 
-
-            
-    //         return fp;
-    //     }
-    // }
-
-
 }
 
 
-int mygrep( char * argv[]){
+int main( int argc, char * argv[]){
 
     FILE * fp; 
     char pattern[100]; 

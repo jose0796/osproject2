@@ -1,3 +1,10 @@
+/*
+ * Author: Jose Moran
+ * email : jmoran071996@gmail.com 
+ * github: jose0796
+ * 
+ */
+
 #include<stdio.h>
 #include<stdlib.h>
 #include<unistd.h>
@@ -94,11 +101,12 @@ void printdir(char * dir, int flags){
     struct dirent *entry;
     struct stat statbuf;
     int error; 
-
+    char default_path[255];
     char directories[100][100];
     int num_subds = 0 ; 
     if((dp = opendir(dir)) == NULL) {
-        if ((dp = opendir(getenv("PWD"))) == NULL){
+        getcwd(default_path,255);
+        if ((dp = opendir(default_path)) == NULL){
             printf("Error opening directory.");
             
         }else{
@@ -277,7 +285,7 @@ int ls_flag_parser(char * argv[], char * path){
 
     }
     if (!found_path){
-        strcpy(path, getenv("PWD"));
+        getcwd(path, 255);
     }
 
 
@@ -288,13 +296,15 @@ int ls_flag_parser(char * argv[], char * path){
 }
 
 
-int myls(char * argv[]){
+int main(int argc, char * argv[]){
 
     struct stat fileSt; 
     struct dirent dir; 
-
+    char path[255]; 
     if (argv[1] == NULL){
-        printdir(getenv("PWD"), 0);
+        
+        getcwd(path,255);
+        printdir(path, 0);
         
     }else if (argv[1][0] != '-' && argv[1][0] != '<' && argv[1][0] != '>'){
         printdir(argv[1], 0);

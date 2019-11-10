@@ -1,3 +1,10 @@
+/*
+ * Author: Jose Moran
+ * email : jmoran071996@gmail.com 
+ * github: jose0796
+ * 
+ */
+
 #include<stdio.h>
 #include<stdlib.h>
 #include<sys/stat.h>
@@ -107,7 +114,7 @@ int chmod_flags_parser(char *  args[], char * filename){
 
 
 
-int mychmod(char * argv[]){
+int main(int argc, char * argv[]){
 
     char filename[100]; 
     int flags = chmod_flags_parser(argv, filename);

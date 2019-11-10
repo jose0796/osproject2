@@ -1,4 +1,9 @@
-
+/*
+ * Author: Jose Moran
+ * email : jmoran071996@gmail.com 
+ * github: jose0796
+ * 
+ */
 
 #define RD  0b1
 #define WR  0b10

@@ -5,7 +5,6 @@
 .SHELL      = bash
 .PWD        = $(shell pwd)
 .COMPILER   = gcc 
-.LINKER     = gcc -c
 .FILES      =  \
               ls \
               grep \
@@ -23,15 +22,13 @@
 # targets
 # ------------------------------------------------------------------------------
 # compile all .c files in folder
-compile: $(.files_o)
+compile: $(.FILES)
 
 	@for file in $(.FILES); do \
-		$(.LINKER) $(addsuffix .c, $$file) -o $(addsuffix .o ,$$file) ;        \
+		$(.COMPILER) -g $(addsuffix .c, $$file) -o $$file ;        \
 	done 
-
-	$(.COMPILER) $(addsuffix .o, $(.FILES)) -o $(.EXE) 
 	
-	mv *.o $(.EXE) $(.BFOLDER)/
+	mv $(.FILES) $(.BFOLDER)/
 	
 
 #-------------------------------------------------------------------------------
